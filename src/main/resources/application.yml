@@ -1,0 +1,16 @@
+server:
+  port: 8926
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    root: INFO
+    org:
+      springframework:
+        boot:
+          autoconfigure: ERROR
+
+#log4j config log path
+log:
+  path: logs
+
