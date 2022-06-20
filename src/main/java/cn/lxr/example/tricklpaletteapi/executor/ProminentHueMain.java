@@ -2,7 +2,6 @@ package cn.lxr.example.tricklpaletteapi.executor;
 
 import cn.lxr.example.tricklpaletteapi.model.PaletteFile;
 import com.trickl.palette.Palette;
-import com.trickl.palette.Target;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
@@ -24,7 +23,7 @@ public class ProminentHueMain {
     public static String RESOURCES_PATH = "src/main/resources/";
 
     public static void main(String[] args) {
-        File fileDir = new File(RESOURCES_PATH + "test");
+        File fileDir = new File(RESOURCES_PATH + "upload");
         System.out.println("FileName\tDominant\tLightVibrant\tVibrant\tDarkVibrant\tLightMuted\tMuted\tDarkMuted");
         List<PaletteFile> paletteFileList = Arrays.stream(fileDir.listFiles(File::isFile)).parallel().map(file -> {
             BufferedImage bufferedImage = getBufferedImage(file);
@@ -37,13 +36,13 @@ public class ProminentHueMain {
             return new PaletteFile(palette, file, file.getName());
         }).collect(Collectors.toList());
         paletteFileList.parallelStream().forEach(paletteFile -> System.out.println(paletteFile.getName()
-                + "\t" + getIfNotNull2HexInt(paletteFile.getPalette().getDominantSwatch(), Palette.Swatch :: getRgb)
-                + "\t" + getIfNotNull2HexInt(paletteFile.getPalette().getLightVibrantSwatch(), Palette.Swatch :: getRgb)
-                + "\t" + getIfNotNull2HexInt(paletteFile.getPalette().getVibrantSwatch(), Palette.Swatch :: getRgb)
-                + "\t" + getIfNotNull2HexInt(paletteFile.getPalette().getDarkVibrantSwatch(), Palette.Swatch :: getRgb)
-                + "\t" + getIfNotNull2HexInt(paletteFile.getPalette().getLightMutedSwatch(), Palette.Swatch :: getRgb)
-                + "\t" + getIfNotNull2HexInt(paletteFile.getPalette().getMutedSwatch(), Palette.Swatch :: getRgb)
-                + "\t" + getIfNotNull2HexInt(paletteFile.getPalette().getDarkMutedSwatch(), Palette.Swatch :: getRgb)
+                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getDominantSwatch(), Palette.Swatch :: getRgb)
+                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getLightVibrantSwatch(), Palette.Swatch :: getRgb)
+                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getVibrantSwatch(), Palette.Swatch :: getRgb)
+                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getDarkVibrantSwatch(), Palette.Swatch :: getRgb)
+                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getLightMutedSwatch(), Palette.Swatch :: getRgb)
+                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getMutedSwatch(), Palette.Swatch :: getRgb)
+                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getDarkMutedSwatch(), Palette.Swatch :: getRgb)
         ));
     }
 
@@ -70,10 +69,10 @@ public class ProminentHueMain {
         return String.valueOf(func.apply(swatch));
     }
 
-    private static String getIfNotNull2HexInt(Palette.Swatch swatch, Function<Palette.Swatch, Integer> func) {
+    private static String getIfNotNull2RGBHex(Palette.Swatch swatch, Function<Palette.Swatch, Integer> func) {
         if (swatch == null) {
             return "null";
         }
-        return Integer.toHexString(func.apply(swatch));
+        return Integer.toHexString(func.apply(swatch)).substring(2);
     }
 }
