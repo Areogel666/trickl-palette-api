@@ -1,5 +1,5 @@
 # trickl-palette-api
-### 安卓调色板
+### java实现安卓调色板
 
 1. 取色ProminentHueMain
 2. 获取文本推荐色SwatchBodyTextColorMain
