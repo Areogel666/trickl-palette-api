@@ -5,7 +5,9 @@ import com.trickl.palette.Palette;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,18 +17,19 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 获取主色调
+ * 获取推荐文本颜色值
  */
 @Slf4j
-public class ProminentHueMain {
+public class SwatchBodyTextColorMain {
 
     public static String RESOURCES_PATH = "src/main/resources/";
 
     public static void main(String[] args) {
         File fileDir = new File(RESOURCES_PATH + "upload");
-        System.out.println("FileName\tDominant\tLightVibrant\tVibrant\tDarkVibrant\tLightMuted\tMuted\tDarkMuted");
         List<PaletteFile> paletteFileList = Arrays.stream(fileDir.listFiles(File::isFile)).parallel().map(file -> {
             BufferedImage bufferedImage = getBufferedImage(file);
+            ColorModel colorModel = bufferedImage.getColorModel();
+            System.out.println(file.getName() + "\t" + colorModel.getTransparency());
 //            // 直接生成实例
 //            Palette palette = Palette.from(bufferedImage).generate();
             // builder构筑生成实例
@@ -35,14 +38,15 @@ public class ProminentHueMain {
             Palette palette = builder.generate();
             return new PaletteFile(palette, file, file.getName());
         }).collect(Collectors.toList());
+        System.out.println("FileName\tDominant\tLightVibrant\tVibrant\tDarkVibrant\tLightMuted\tMuted\tDarkMuted");
         paletteFileList.parallelStream().forEach(paletteFile -> System.out.println(paletteFile.getName()
-                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getDominantSwatch(), Palette.Swatch :: getRgb)
-                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getLightVibrantSwatch(), Palette.Swatch :: getRgb)
-                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getVibrantSwatch(), Palette.Swatch :: getRgb)
-                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getDarkVibrantSwatch(), Palette.Swatch :: getRgb)
-                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getLightMutedSwatch(), Palette.Swatch :: getRgb)
-                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getMutedSwatch(), Palette.Swatch :: getRgb)
-                + "\t" + getIfNotNull2RGBHex(paletteFile.getPalette().getDarkMutedSwatch(), Palette.Swatch :: getRgb)
+                + "\t" + getIfNotNull2RGBTextHex(paletteFile.getPalette().getDominantSwatch(), Palette.Swatch :: getBodyTextColor)
+                + "\t" + getIfNotNull2RGBTextHex(paletteFile.getPalette().getLightVibrantSwatch(), Palette.Swatch :: getBodyTextColor)
+                + "\t" + getIfNotNull2RGBTextHex(paletteFile.getPalette().getVibrantSwatch(), Palette.Swatch :: getBodyTextColor)
+                + "\t" + getIfNotNull2RGBTextHex(paletteFile.getPalette().getDarkVibrantSwatch(), Palette.Swatch :: getBodyTextColor)
+                + "\t" + getIfNotNull2RGBTextHex(paletteFile.getPalette().getLightMutedSwatch(), Palette.Swatch :: getBodyTextColor)
+                + "\t" + getIfNotNull2RGBTextHex(paletteFile.getPalette().getMutedSwatch(), Palette.Swatch :: getBodyTextColor)
+                + "\t" + getIfNotNull2RGBTextHex(paletteFile.getPalette().getDarkMutedSwatch(), Palette.Swatch :: getBodyTextColor)
         ));
     }
 
@@ -54,7 +58,7 @@ public class ProminentHueMain {
     private static BufferedImage getBufferedImage(File file) {
         String path = "/" + file.getPath().replaceAll(RESOURCES_PATH, "");
         try {
-            InputStream imageStream = ProminentHueMain.class.getResourceAsStream(path);
+            InputStream imageStream = SwatchBodyTextColorMain.class.getResourceAsStream(path);
             return ImageIO.read(imageStream);
         } catch (IOException e) {
             log.error("read image error", e);
@@ -62,18 +66,10 @@ public class ProminentHueMain {
         return null;
     }
 
-    private static String getIfNotNull(Palette.Swatch swatch, Function<Palette.Swatch, Object> func) {
+    private static String getIfNotNull2RGBTextHex(Palette.Swatch swatch, Function<Palette.Swatch, Color> func) {
         if (swatch == null) {
             return "null";
         }
-        return String.valueOf(func.apply(swatch));
+        return Integer.toHexString(func.apply(swatch).getRGB());
     }
-
-    private static String getIfNotNull2RGBHex(Palette.Swatch swatch, Function<Palette.Swatch, Integer> func) {
-        if (swatch == null) {
-            return "null";
-        }
-        return Integer.toHexString(func.apply(swatch)).substring(2);
-    }
-
 }
